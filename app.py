@@ -55,10 +55,3 @@ if __name__ == '__main__':
     http_server = WSGIServer(("0.0.0.0", 5000), app)
     print('Server started.')
     http_server.serve_forever() 
-    '''
-    app.run(
-      host ='0.0.0.0',
-      port = 5000,
-      debug = False
-    )
-    '''
