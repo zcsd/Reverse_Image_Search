@@ -8,3 +8,4 @@ __pycache__/
 test/
 train/
 upload/
+data/

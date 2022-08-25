@@ -29,7 +29,7 @@ def create_milvus_collection(collection_name, dim):
 collection = create_milvus_collection('resnet_50_norm', 2048)
 
 start = (
-    towhee.read_csv('files_to_train.csv')
+    towhee.read_csv('./data/image_100x10/files_to_train.csv')
       .runas_op['id', 'id'](func=lambda x: int(x))
       .image_decode['path', 'img']()
       .image_embedding.timm['img', 'vec'](model_name='resnet50')

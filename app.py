@@ -33,7 +33,7 @@ def cbir():
             #print(results)
             now = datetime.now()
             timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
-            img.save("./upload/" + timestamp +".JPEG") 
+            img.save("./data/upload/" + timestamp +".JPEG") 
             print('An uploaded image saved')
             base_url = "https://files.best360.tech/images/"
             resp = jsonify({'ok':True, 'result': msg, 

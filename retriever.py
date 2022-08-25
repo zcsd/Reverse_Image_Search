@@ -5,7 +5,7 @@ from towhee.types.image_utils import from_pil
 
 class Retriever:
     def __init__(self, host, collection_name):
-        df = pd.read_csv('files_to_train.csv')
+        df = pd.read_csv('./data/image_100x10/files_to_train.csv')
 
         id_img = df.set_index('id')['path'].to_dict()
 
