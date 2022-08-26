@@ -1,4 +1,4 @@
-from minio_bucket import Bucket
+from image_search.minio_bucket import Bucket
 from minio.error import S3Error
 
 try:
@@ -15,3 +15,4 @@ try:
         print("bucket not exists")
 except S3Error as e:
     print("error:", e)
+    

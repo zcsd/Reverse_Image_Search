@@ -2,10 +2,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.log
-
 .Python
 
-test/
+*.JPEG
+*.jpeg
 train/
-upload/
-data/
+test/
+val/
+*.csv

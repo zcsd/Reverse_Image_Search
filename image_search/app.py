@@ -5,8 +5,8 @@ from gevent.pywsgi import WSGIServer
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from retriever import Retriever
-from util import base64_to_pil
+from image_search.retriever import Retriever
+from image_search.util import base64_to_pil
 
 retriever = Retriever('127.0.0.1', 'resnet_50_norm')
 
@@ -33,7 +33,7 @@ def cbir():
             #print(results)
             now = datetime.now()
             timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
-            img.save("./data/upload/" + timestamp +".JPEG") 
+            img.save("/data/upload/" + timestamp +".JPEG") 
             print('An uploaded image saved')
             base_url = "https://files.best360.tech/images/"
             resp = jsonify({'ok':True, 'result': msg, 
