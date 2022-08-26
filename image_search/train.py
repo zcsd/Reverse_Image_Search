@@ -1,7 +1,7 @@
+from configparser import ConfigParser
+
 import towhee
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
-
-connections.connect(host='127.0.0.1', port='19530')
 
 def create_milvus_collection(collection_name, dim):
     if utility.has_collection(collection_name):
@@ -26,15 +26,22 @@ def create_milvus_collection(collection_name, dim):
     
     return collection
 
-collection = create_milvus_collection('resnet_50_norm', 2048)
+if __name__ == '__main__':
+    cfg = ConfigParser()
+    cfg.read('image_search/conf/config.ini')
 
-start = (
-    towhee.read_csv('/data/image_100x10/files_to_train.csv')
-      .runas_op['id', 'id'](func=lambda x: int(x))
-      .image_decode['path', 'img']()
-      .image_embedding.timm['img', 'vec'](model_name='resnet50')
-      .tensor_normalize['vec', 'vec']()
-      .to_milvus['id', 'vec'](collection=collection, batch=100)
-)
+    connections.connect(host=cfg.get('vector_server', 'host'),
+                        port=cfg.get('vector_server', 'port'))
 
-print('Total number of inserted data is {}.'.format(collection.num_entities))
+    collection = create_milvus_collection('resnet_50_norm', 2048)
+
+    start = (
+        towhee.read_csv('image_search/data/image_100x10/files_to_train.csv')
+        .runas_op['id', 'id'](func=lambda x: int(x))
+        .image_decode['path', 'img']()
+        .image_embedding.timm['img', 'vec'](model_name='resnet50')
+        .tensor_normalize['vec', 'vec']()
+        .to_milvus['id', 'vec'](collection=collection, batch=100)
+    )
+
+    print('Total number of inserted data is {}.'.format(collection.num_entities))

@@ -1,14 +1,13 @@
 import time
 from datetime import datetime
+from configparser import ConfigParser
 
 from gevent.pywsgi import WSGIServer
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from image_search.retriever import Retriever
-from image_search.util import base64_to_pil
-
-retriever = Retriever('127.0.0.1', 'resnet_50_norm')
+from image_retriever.retriever import Retriever
+from utils.image_converter import base64_to_pil
 
 app = Flask(__name__)
 
@@ -33,7 +32,7 @@ def cbir():
             #print(results)
             now = datetime.now()
             timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
-            img.save("/data/upload/" + timestamp +".JPEG") 
+            img.save("image_search/data/upload/" + timestamp +".JPEG") 
             print('An uploaded image saved')
             base_url = "https://files.best360.tech/images/"
             resp = jsonify({'ok':True, 'result': msg, 
@@ -50,8 +49,18 @@ def cbir():
         return 'Invalid Method.\n'
 
 if __name__ == '__main__':
+    cfg = ConfigParser()
+    cfg.read('image_search/conf/config.ini')
+
+    retriever = Retriever(cfg.get('vector_server', 'host'), 
+                          cfg.get('vector_server', 'port'),
+                         'resnet_50_norm')
+
     CORS(app, resources=r'/*')
 
-    http_server = WSGIServer(("0.0.0.0", 5000), app)
+    http_server = WSGIServer((cfg.get('http_server', 'host'), 
+                            cfg.getint('http_server', 'port')),
+                            app)
+
     print('Server started.')
     http_server.serve_forever() 

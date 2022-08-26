@@ -4,12 +4,12 @@ import towhee
 from towhee.types.image_utils import from_pil
 
 class Retriever:
-    def __init__(self, host, collection_name):
-        df = pd.read_csv('/data/image_100x10/files_to_train.csv')
+    def __init__(self, host, port, collection_name):
+        df = pd.read_csv('image_search/data/image_100x10/files_to_train.csv')
 
         id_img = df.set_index('id')['path'].to_dict()
 
-        connections.connect(host=host, port='19530')
+        connections.connect(host=host, port=port)
 
         if utility.has_collection(collection_name):
             self.collection = Collection(collection_name)
