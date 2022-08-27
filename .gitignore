@@ -10,3 +10,4 @@ train/
 test/
 val/
 *.csv
+*.h5
