@@ -5,9 +5,9 @@ from towhee.types.image_utils import from_pil
 
 class Retriever:
     def __init__(self, host, port, collection_name):
-        df = pd.read_csv('image_search/data/image_100x10/files_to_train.csv')
+        #df = pd.read_csv('image_search/data/image_100x10/files_to_train.csv')
 
-        id_img = df.set_index('id')['path'].to_dict()
+        #id_img = df.set_index('id')['path'].to_dict()
 
         connections.connect(host=host, port=port)
 
@@ -21,8 +21,8 @@ class Retriever:
                 api.runas_op(func=lambda img: from_pil(img))
                 .image_embedding.timm(model_name='resnet50')
                 .tensor_normalize()
-                .milvus_search(collection=self.collection, limit=5)
-                .runas_op(func=lambda res: [[x.id,x.score,id_img[x.id]] for x in res])
+                .milvus_search(collection=self.collection, limit=5, output_fields=['id', 'label'])
+                .runas_op(func=lambda res: [[x.id, x.score, x.label] for x in res])
                 .as_function()
             )
 

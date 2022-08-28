@@ -34,13 +34,13 @@ def cbir():
             timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
             img.save("image_search/data/upload/" + timestamp +".JPEG") 
             print('An uploaded image saved')
-            base_url = "https://files.best360.tech/images/"
+            base_url = "https://files.best360.tech/images"
             resp = jsonify({'ok':True, 'result': msg, 
-                    'image1': base_url + results[0][2].replace("./train/", ""),
-                    'image2': base_url + results[1][2].replace("./train/", ""),
-                    'image3': base_url + results[2][2].replace("./train/", ""),
-                    'image4': base_url + results[3][2].replace("./train/", ""),
-                    'image5': base_url + results[4][2].replace("./train/", "")})
+                    'image1': base_url + results[0][2].replace("@", "/"),
+                    'image2': base_url + results[1][2].replace("@", "/"),
+                    'image3': base_url + results[2][2].replace("@", "/"),
+                    'image4': base_url + results[3][2].replace("@", "/"),
+                    'image5': base_url + results[4][2].replace("@", "/")})
         else:
             print('Invalid Key')
             resp = jsonify({'ok':False, 'result':'密钥不合法'})
@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     retriever = Retriever(cfg.get('vector_server', 'host'), 
                           cfg.get('vector_server', 'port'),
-                         'resnet_50_norm')
+                         'test_resnet_50_norm')
 
     CORS(app, resources=r'/*')
 
