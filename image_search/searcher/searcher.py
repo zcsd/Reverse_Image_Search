@@ -3,7 +3,7 @@ from pymilvus import connections, Collection, utility
 import towhee
 from towhee.types.image_utils import from_pil
 
-class Retriever:
+class Searcher:
     def __init__(self, host, port, collection_name):
         #df = pd.read_csv('image_search/data/image_100x10/files_to_train.csv')
 
@@ -26,7 +26,7 @@ class Retriever:
                 .as_function()
             )
 
-        print('Retriever is ready.')
+        print('Image Searcher is ready.')
 
     def search(self, pil_img):
         return self.search(pil_img)

@@ -11,3 +11,5 @@ test/
 val/
 *.csv
 *.h5
+
+test.py

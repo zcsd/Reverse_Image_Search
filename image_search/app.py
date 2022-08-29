@@ -6,8 +6,8 @@ from gevent.pywsgi import WSGIServer
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from image_retriever.retriever import Retriever
-from utils.image_converter import base64_to_pil
+from searcher.searcher import Searcher
+from utils.image_util import base64_to_pil
 
 app = Flask(__name__)
 
@@ -24,7 +24,7 @@ def cbir():
             print('Valid Key')
             img = base64_to_pil(data["image"])
             start = time.time()
-            results = retriever.search(img)
+            results = searcher.search(img)
             end = time.time()
             time_taken = (end - start) * 1000
             msg = "搜索耗时: {:.0f} 毫秒".format(time_taken)
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     cfg = ConfigParser()
     cfg.read('image_search/conf/config.ini')
 
-    retriever = Retriever(cfg.get('vector_server', 'host'), 
+    searcher = Searcher(cfg.get('vector_server', 'host'), 
                           cfg.get('vector_server', 'port'),
                          'test_resnet_50_norm')
 
