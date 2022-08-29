@@ -1,4 +1,3 @@
-import time
 from datetime import datetime
 from configparser import ConfigParser
 
@@ -14,35 +13,37 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     # check AI server status
-    return jsonify({'ok':True})
+    entities_num = image_searcher.get_numer_of_entities()
+    if (isinstance(entities_num, int) and entities_num > 0):
+        return jsonify({"ok": True, "entities_num": str(entities_num)})
+    else:
+        return jsonify({'ok': False})
 
 @app.route("/cbir/", methods=['GET', 'POST'])
 def cbir():
     if request.method == 'POST':
         data = request.json
         if data["key"] == "demo1":
-            print('Valid Key')
+            print('Valid Key.')
             img = base64_to_pil(data["image"])
-            start = time.time()
-            results = searcher.search(img)
-            end = time.time()
-            time_taken = (end - start) * 1000
-            msg = "搜索耗时: {:.0f} 毫秒".format(time_taken)
-            print("Search Time: {:.0f} ms".format(time_taken))
-            #print(results)
+            results = image_searcher.search(img, 6)
+
             now = datetime.now()
             timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
             img.save("image_search/data/upload/" + timestamp +".JPEG") 
-            print('An uploaded image saved')
-            base_url = "https://files.best360.tech/images"
-            resp = jsonify({'ok':True, 'result': msg, 
-                    'image1': base_url + results[0][2].replace("@", "/"),
-                    'image2': base_url + results[1][2].replace("@", "/"),
-                    'image3': base_url + results[2][2].replace("@", "/"),
-                    'image4': base_url + results[3][2].replace("@", "/"),
-                    'image5': base_url + results[4][2].replace("@", "/")})
+            print('An uploaded image saved.')
+
+            base_url = "https://files-hk.best360.tech/images"
+            
+            resp = jsonify({'ok':True,
+                    'image1': base_url + results[0].label.replace("@", "/"),
+                    'image2': base_url + results[1].label.replace("@", "/"),
+                    'image3': base_url + results[2].label.replace("@", "/"),
+                    'image4': base_url + results[3].label.replace("@", "/"),
+                    'image5': base_url + results[4].label.replace("@", "/"),
+                    'result': "特征提取耗时：{} 毫秒, 搜索耗时: {} 毫秒".format(results[5].embedding_time, results[5].search_time)})
         else:
-            print('Invalid Key')
+            print('Invalid Key.')
             resp = jsonify({'ok':False, 'result':'密钥不合法'})
         return resp
     else:
@@ -52,9 +53,9 @@ if __name__ == '__main__':
     cfg = ConfigParser()
     cfg.read('image_search/conf/config.ini')
 
-    searcher = Searcher(cfg.get('vector_server', 'host'), 
+    image_searcher = Searcher(cfg.get('vector_server', 'host'), 
                           cfg.get('vector_server', 'port'),
-                         'test_resnet_50_norm')
+                         'imagenet_resnet_50_norm')
 
     CORS(app, resources=r'/*')
 
@@ -62,5 +63,5 @@ if __name__ == '__main__':
                             cfg.getint('http_server', 'port')),
                             app)
 
-    print('Server started.')
+    print('Web server started at port {}.'.format(cfg.getint('http_server', 'port')))
     http_server.serve_forever() 

@@ -11,5 +11,6 @@ test/
 val/
 *.csv
 *.h5
+*.tar
 
 test.py

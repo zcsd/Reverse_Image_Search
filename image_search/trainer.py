@@ -25,7 +25,8 @@ from towhee import ops
 from towhee.types.image_utils import from_pil
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
-dataset_folder = "image_100x10" # change here
+dataset_folder = "imagenet_1000x34" # change here
+num_nlist = 750  # change here  4xsqrt(n) in each segment
 
 def create_collection(collection_name, dim, description):
     if utility.has_collection(collection_name):
@@ -45,9 +46,9 @@ def create_collection(collection_name, dim, description):
 def create_index(collection):
     # create IVF_FLAT index for collection.
     index_params = {
-        'metric_type':'L2',
-        'index_type':"IVF_FLAT",
-        'params':{"nlist":128}
+        'metric_type': 'L2',
+        'index_type': "IVF_FLAT",
+        'params':{"nlist": num_nlist}
     }
     collection.create_index(field_name="embedding", index_params=index_params)
 
@@ -65,7 +66,7 @@ if __name__ == '__main__':
     print("Connected to vector server {0}:{1} successfully.".format(cfg.get('vector_server', 'host'), cfg.get('vector_server', 'port')))
 
     print("Creating collection...")
-    collection = create_collection('test_resnet_50_norm', 2048, "test resnet50 with norm")
+    collection = create_collection('imagenet_resnet_50_norm', 2048, "imagenet34000 resnet50 norm")
     print("Collection created successfully.")
 
     op = ops.image_embedding.timm(model_name='resnet50')

@@ -22,7 +22,15 @@ from configparser import ConfigParser
 from utils.minio_bucket import Bucket
 from minio.error import S3Error
 
-dataset_folder = "image_100x10" # change here
+dataset_folder = "imagenet_1000x34" # change here
+
+my_bucket = Bucket(service="localhost:8000", access_key="user1", secret_key="user1password")
+
+def upload_to_minio(file_path_on_minio, file_path_on_disk):
+    try:
+        my_bucket.upload_file(bucket_name="images", file=file_path_on_minio, file_path=file_path_on_disk, content_type="image/jpeg")
+    except S3Error as e:
+        print(e)
 
 '''
 try:
@@ -73,6 +81,7 @@ if __name__ == '__main__':
             image = Image.open(img_path)
             if (image.mode != 'RGB'): # grayscale image will be converted to RGB
                 image = image.convert('RGB')
+            #upload_to_minio('/' + img_path.split(separator)[-2] + '/' + img_path.split(separator)[-1], img_path)
             #image = image.resize((224, 224))
             image_buf = io.BytesIO()
             image.save(image_buf, format='JPEG')
