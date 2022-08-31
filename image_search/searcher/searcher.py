@@ -7,7 +7,7 @@ from towhee.functional.entity import Entity
 
 class Searcher:
     def __init__(self, host, port, collection_name):
-        connections.connect(alias="default", host=host, port=port)
+        connections.connect(alias="searcher1", host=host, port=port)
 
         print("Connected to vector server {0}:{1} successfully.".format(host, port))
 

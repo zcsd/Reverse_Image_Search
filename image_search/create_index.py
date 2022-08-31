@@ -5,8 +5,7 @@ from configparser import ConfigParser
 
 from pymilvus import connections, Collection, utility
 
-dataset_folder = "imagenet_1000x34" # change here
-collection_name = "imagenet_resnet_50_norm"
+collection_name = "image_resnet_50_norm" # change here
 num_nlist = 750  # change here  4xsqrt(n) in each segment
 
 def create_index(collection):
@@ -19,10 +18,6 @@ def create_index(collection):
     collection.create_index(field_name="embedding", index_params=index_params)
 
 if __name__ == '__main__':
-    data_folder = os.path.join(os.getcwd(), 'image_search', 'data')
-
-    train_img_folder = os.path.join(data_folder, dataset_folder, 'train')
-
     cfg = ConfigParser()
     cfg.read('image_search/conf/config.ini')
 

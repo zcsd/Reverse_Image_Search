@@ -145,8 +145,10 @@ class Bucket(object):
             with open(file_path, "rb") as file_data:
                 file_stat = os.stat(file_path)
                 self.client.put_object(bucket_name, file, file_data, file_stat.st_size, content_type=content_type)
+            return True
         except S3Error as e:
             print("[error]:", e)
+            return False
 
     def fput_file(self, bucket_name, file, file_path):
         """
@@ -158,8 +160,10 @@ class Bucket(object):
         """
         try:
             self.client.fput_object(bucket_name, file, file_path)
+            return True
         except S3Error as e:
             print("[error]:", e)
+            return False
 
     def stat_object(self, bucket_name, file):
         """

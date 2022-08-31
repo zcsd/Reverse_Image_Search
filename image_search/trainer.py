@@ -4,10 +4,12 @@
 # Date created: 2022/08/10
 # Python Version: 3.10
 # Description:
-#    read images from hdf5 file
-#    embedding images
-#    insert embedding vectors to vector server collection
-#    create index for collection
+#    - Read images from hdf5 file
+#    - Embedding images
+#    - Insert embedding vectors to vector server collection
+#    - Create index for collection
+# How to run:
+#    python trainer.py
 # =============================================================================
 
 import os
@@ -25,8 +27,10 @@ from towhee import ops
 from towhee.types.image_utils import from_pil
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
-dataset_folder = "imagenet_1000x34" # change here
+dataset_folder = "image_100x10" # change here
+collection_name = "image_resnet_50_norm"
 num_nlist = 750  # change here  4xsqrt(n) in each segment
+CREATE_INDEX = False # change here
 
 def create_collection(collection_name, dim, description):
     if utility.has_collection(collection_name):
@@ -54,19 +58,19 @@ def create_index(collection):
 
 if __name__ == '__main__':
     data_folder = os.path.join(os.getcwd(), 'image_search', 'data')
-
     train_img_folder = os.path.join(data_folder, dataset_folder, 'train')
 
     cfg = ConfigParser()
     cfg.read('image_search/conf/config.ini')
 
     print("Connecting to vector server...")
-    connections.connect(host=cfg.get('vector_server', 'host'),
+    connections.connect(alias="default",
+                        host=cfg.get('vector_server', 'host'),
                         port=cfg.get('vector_server', 'port'))
     print("Connected to vector server {0}:{1} successfully.".format(cfg.get('vector_server', 'host'), cfg.get('vector_server', 'port')))
 
     print("Creating collection...")
-    collection = create_collection('imagenet_resnet_50_norm', 2048, "imagenet34000 resnet50 norm")
+    collection = create_collection(collection_name, 2048, "test description")
     print("Collection created successfully.")
 
     op = ops.image_embedding.timm(model_name='resnet50')
@@ -77,28 +81,28 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    with h5py.File(os.path.join(data_folder, dataset_folder, 'train.h5'), 'r') as hf:
-        length = len(hf.items())
-        print("Total number of images: {}".format(length))
-        print("Start to embedding and insert data into vector server...")
-        for i, (key, value) in enumerate(hf.items()):
-            image_data = np.array(hf[key]) 
-            image_pil = Image.open(io.BytesIO(image_data))
-            embedding_vector = op(from_pil(image_pil))
-            norm_embedding_vector = embedding_vector / np.linalg.norm(embedding_vector)
-        
-            id_list.append(i)
-            label_list.append(key)
-            vec_list.append(norm_embedding_vector)
+    hf = h5py.File(os.path.join(data_folder, dataset_folder, 'train.h5'), 'r')
+    length = len(hf.items())
+    print("Total number of images in HDF5 file: {}".format(length))
+    print("Start to embedding and insert data into vector server...")
+    for i, (key, value) in enumerate(hf.items()):
+        image_data = np.array(hf[key]) 
+        image_pil = Image.open(io.BytesIO(image_data))
+        embedding_vector = op(from_pil(image_pil))
+        norm_embedding_vector = embedding_vector / np.linalg.norm(embedding_vector)
+    
+        id_list.append(i)
+        label_list.append(key)
+        vec_list.append(norm_embedding_vector)
 
-            if i % 100 == 0: # batch size is 100
-                collection.insert([id_list, label_list, vec_list])
-                id_list.clear()
-                label_list.clear()
-                vec_list.clear()
-                progress(int((i/length) * 100))
+        if i % 100 == 0: # batch size is 100
+            collection.insert([id_list, label_list, vec_list])
+            id_list.clear()
+            label_list.clear()
+            vec_list.clear()
+            progress(int((i/length) * 100))
 
-        hf.close()
+    hf.close()
 
     if len(id_list) != 0:
         collection.insert([id_list, label_list, vec_list])
@@ -109,18 +113,21 @@ if __name__ == '__main__':
 
     end = time.time()
     print("\nTotal time spent on embedding and insert: {:0.1f} seconds".format(end - start))
-    print('Total number of inserted data is {}.'.format(collection.num_entities))
+    print('Total number of inserted vector is {}.'.format(collection.num_entities))
 
-    print("Creating index...")
-    start = time.time()
-    create_index(collection)
-    end = time.time()
-    print("Index created successfully.")
-    print("Total time spent on creating index: {:0.1f} seconds".format(end - start))
+    if CREATE_INDEX:
+        print("Creating index...")
+        start = time.time()
+        create_index(collection)
+        end = time.time()
+        print("Index created successfully.")
+        print("Total time spent on creating index: {:0.1f} seconds".format(end - start))
     
-    print("Loading collection into memory...")
-    collection.load()
-    print("Collection loaded successfully.")
+        #print("Loading collection into memory...")
+        #collection.load()
+        #print("Collection loaded successfully.")
+    
+    connections.disconnect("default")
 
 '''
 # another way to create collection

@@ -4,8 +4,10 @@
 # Date created: 2022/08/25
 # Python Version: 3.10
 # Description:
-#    images => hdf5
-#    images => minio object storage
+#    - images => hdf5
+#    - images => minio object storage
+# How to run:
+#    python preprocess.py
 # =============================================================================
 
 import os
@@ -22,38 +24,24 @@ from configparser import ConfigParser
 from utils.minio_bucket import Bucket
 from minio.error import S3Error
 
-dataset_folder = "imagenet_1000x34" # change here
+dataset_folder = "image_test" # change here
+TO_MINIO = False # change here
+TO_HDF5 = False  # change here
 
-my_bucket = Bucket(service="localhost:8000", access_key="user1", secret_key="user1password")
-
-def upload_to_minio(file_path_on_minio, file_path_on_disk):
+def upload_to_minio(bucket, file_path_on_minio, file_path_on_disk):
     try:
-        my_bucket.upload_file(bucket_name="images", file=file_path_on_minio, file_path=file_path_on_disk, content_type="image/jpeg")
+        bucket.fput_file(bucket_name="images", file=file_path_on_minio, file_path=file_path_on_disk)
+        return True
     except S3Error as e:
         print(e)
-
-'''
-try:
-    my_bucket = Bucket(service="localhost:8000", access_key="user1", secret_key="user1password")
-    if my_bucket.exists_bucket(bucket_name="images"):
-        print("bucket exists")
-        print(my_bucket.bucket_list_files(bucket_name="images", prefix=""))
-        #my_bucket.download_file(bucket_name="images", file="gear11.JPEG", file_path="upload/test.jpeg")
-        #my_bucket.fget_file(bucket_name="images", file="test11.JPEG", file_path="upload/test11.jpeg")
-        
-        #my_bucket.fput_file(bucket_name="images", file="test11.JPEG", file_path="upload/2022-08-23_22-09-07_046190.JPEG")
-        #my_bucket.upload_file(bucket_name="images", file="test12.JPEG", file_path="upload/2022-08-23_22-09-07_046190.JPEG", content_type="image/jpeg")
-    else:
-        print("bucket not exists")
-except S3Error as e:
-    print("error:", e)
-'''
+        return False
 
 if __name__ == '__main__':
+    cfg = ConfigParser()
+    cfg.read('image_search/conf/config.ini')
+
     data_folder = os.path.join(os.getcwd(), 'image_search', 'data')
-
     train_img_folder = os.path.join(data_folder, dataset_folder, 'train') 
-
     img_group_folders =  os.listdir(train_img_folder)
 
     img_path_list = []
@@ -65,23 +53,39 @@ if __name__ == '__main__':
             img_path_list.append(img_abs_path)
 
     length_images = len(img_path_list)
-    print("Total number of images:", length_images)
+    print("Total number of images to preprocess:", length_images)
 
     if os.name == 'nt': # windows
         separator = '\\'
     else:
         separator = '/'
 
-    print("Start to convert images to hdf5 file...")
+    if TO_MINIO:
+        counter_fail_to_upload = 0
+        my_bucket = Bucket(service=cfg.get('minio_server', 'host')+':'+cfg.get('minio_server', 'port'),
+                        access_key=cfg.get('minio_server', 'access_key'), 
+                        secret_key=cfg.get('minio_server', 'secret_key'))
+        print("Start to upload images to MINIO...")
+    
+    if TO_HDF5:
+        hf = h5py.File(os.path.join(data_folder, dataset_folder, 'train.h5'), 'a')
+        print("Start to convert images to HDF5 file...")
+
+    print("\n")
     start = time.time()
 
-    with h5py.File(os.path.join(data_folder, dataset_folder, 'train.h5'), 'w') as hf:
-        for i, img_path in enumerate(img_path_list):
-            # using pillow to convert data, to save space in hdf5 file
-            image = Image.open(img_path)
-            if (image.mode != 'RGB'): # grayscale image will be converted to RGB
-                image = image.convert('RGB')
-            #upload_to_minio('/' + img_path.split(separator)[-2] + '/' + img_path.split(separator)[-1], img_path)
+    for i, img_path in enumerate(img_path_list):
+        # using pillow to convert data, to save space in hdf5 file
+        image = Image.open(img_path)
+        if (image.mode != 'RGB'): # grayscale image will be converted to RGB
+            image = image.convert('RGB')
+        
+        if TO_MINIO:
+            if upload_to_minio(my_bucket, '/' + img_path.split(separator)[-2] + '/' + img_path.split(separator)[-1], img_path) == False:
+                print("Failed to upload {} to minio storage".format(img_path))
+                counter_fail_to_upload += 1
+        
+        if TO_HDF5:
             #image = image.resize((224, 224))
             image_buf = io.BytesIO()
             image.save(image_buf, format='JPEG')
@@ -99,14 +103,19 @@ if __name__ == '__main__':
             label = '@' + img_path.split(separator)[-2] + '@' + img_path.split(separator)[-1]
 
             # no need to compress, because binary data is used
-            hf.create_dataset(label, data=image_np)
+            hf.create_dataset(label, data=image_np,)
 
-            if i % 5 == 0:
-                progress(int((i/length_images) * 100))
+        if i % 5 == 0:
+            progress(int((i/length_images) * 100))
+    
+    progress(100)
+    print("\n")
 
+    if TO_MINIO:
+        print("Total number of images uploaded to MINIO:", length_images-counter_fail_to_upload)
+    if TO_HDF5:
+        print("Total number of images in new HDF5 file:", len(hf.items()))
         hf.close()
 
-    progress(100)
-
     end = time.time()
-    print("\nTotal time spent: {:.1f} seconds".format(end - start))
+    print("Total time spent: {:.1f} seconds".format(end - start))
