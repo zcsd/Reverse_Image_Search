@@ -64,7 +64,9 @@ def cbir():
                     'image3': image_base_url + results[2].label.replace("@", "/"),
                     'image4': image_base_url + results[3].label.replace("@", "/"),
                     'image5': image_base_url + results[4].label.replace("@", "/"),
-                    'result': "Embedding Time: {} ms, Search Time: {} ms".format(results[5].embedding_time, results[5].search_time)})
+                    'embedding_time': results[5].embedding_time,
+                    'search_time': results[5].search_time,
+                    })
         else:
             print('Invalid Key.')
             resp = jsonify({'ok':False, 'result':'Invalid Key.'})
