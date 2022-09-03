@@ -1,7 +1,8 @@
 import os
+from datetime import timedelta
+
 from minio import Minio
 from minio.error import S3Error
-from datetime import timedelta
 from minio.deleteobjects import DeleteObject
 
 class Bucket(object):

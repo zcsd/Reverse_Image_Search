@@ -4,12 +4,12 @@
 # Date created: 2022/08/10
 # Python Version: 3.10
 # Description:
-#    - Read images from hdf5 file
+#    - Read images (binary data) from hdf5 file
 #    - Embedding images
 #    - Insert embedding vectors to vector server collection
 #    - Create index for collection
 # How to run:
-#    python trainer.py
+#    python image_search/trainer.py
 # =============================================================================
 
 import os

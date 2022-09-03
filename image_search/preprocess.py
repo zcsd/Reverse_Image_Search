@@ -4,10 +4,11 @@
 # Date created: 2022/08/25
 # Python Version: 3.10
 # Description:
-#    - images => hdf5
+#    - image resize or other processes
+#    - images => hdf5 (binary data)
 #    - images => minio object storage
 # How to run:
-#    python preprocess.py
+#    python image_search/preprocess.py
 # =============================================================================
 
 import os

@@ -1,10 +1,8 @@
 import re
 import base64
-
-import numpy as np
+from io import BytesIO
 
 from PIL import Image
-from io import BytesIO
 
 def base64_to_pil(img_base64):
     """

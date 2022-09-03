@@ -11,7 +11,7 @@
 #       - Loading the image search engine.
 #       - Handle real-time image search request.
 # How to run:
-#    python app.py
+#    python image_search/app.py
 # =============================================================================
 
 from datetime import datetime
@@ -46,8 +46,8 @@ def index():
 def cbir():
     if request.method == 'POST':
         data = request.json
-        if data["key"] == "demo1":
-            print('Valid Key.')
+        if data["key"] == "demo1": # temporary using
+            print('Valid Key Provided.')
             img = base64_to_pil(data["image"])
             results = image_searcher.search(img, 6)
 
@@ -64,10 +64,10 @@ def cbir():
                     'image3': image_base_url + results[2].label.replace("@", "/"),
                     'image4': image_base_url + results[3].label.replace("@", "/"),
                     'image5': image_base_url + results[4].label.replace("@", "/"),
-                    'result': "特征提取耗时：{} 毫秒, 搜索耗时: {} 毫秒".format(results[5].embedding_time, results[5].search_time)})
+                    'result': "Embedding Time: {} ms, Search Time: {} ms".format(results[5].embedding_time, results[5].search_time)})
         else:
             print('Invalid Key.')
-            resp = jsonify({'ok':False, 'result':'密钥不合法'})
+            resp = jsonify({'ok':False, 'result':'Invalid Key.'})
         return resp
     else:
         return 'Invalid Method.\n'

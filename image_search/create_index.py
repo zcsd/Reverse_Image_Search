@@ -1,4 +1,14 @@
-import os
+# =============================================================================
+# File name: create_index.py
+# Author: Zichun
+# Date created: 2022/08/25
+# Python Version: 3.10
+# Description:
+#    - Create index for collection
+# How to run:
+#    python image_search/create_index.py
+# =============================================================================
+
 import time
 
 from configparser import ConfigParser

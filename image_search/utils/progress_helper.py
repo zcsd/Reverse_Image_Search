@@ -1,4 +1,4 @@
-# progress helper
+# A simple progress bar helper function
 
 def progress(percent=0, width=40):
     left = width * percent // 100
