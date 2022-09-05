@@ -25,6 +25,7 @@ from searcher.searcher import Searcher
 from utils.image_util import base64_to_pil
 
 collection_name = "imagenet_resnet_50_norm" # change here
+SERVER = 2 # change here
 
 app = Flask(__name__)
 
@@ -33,9 +34,18 @@ def index():
     # check AI server status
     entities_num = image_searcher.get_numer_of_entities()
 
-    cpu = "Intel i5-9600K @ 3.70GHz, 6 cores"
-    memory = "32GB"
-    gpu = "NONE"
+    if (SERVER == 0):
+        cpu = "Intel Xeon @ 2.80GHz, 8 cores"
+        memory = "32GB"
+        gpu = "NONE"
+    elif (SERVER == 1):
+        cpu = "Intel i5-12600K @ 3.70GHz, 10 cores"
+        memory = "32GB"
+        gpu = "NVIDIA RTX 3070"
+    elif (SERVER == 2):
+        cpu = "Intel i5-9600K @ 3.70GHz, 6 cores"
+        memory = "32GB"
+        gpu = "NONE"
     
     if (isinstance(entities_num, int) and entities_num > 0):
         return jsonify({"ok": True, "entities_num": str(entities_num), "cpu": cpu, "memory": memory, "gpu": gpu})

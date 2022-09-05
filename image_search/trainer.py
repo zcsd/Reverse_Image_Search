@@ -27,8 +27,8 @@ from towhee import ops
 from towhee.types.image_utils import from_pil
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
-dataset_folder = "image_100x10" # change here
-collection_name = "image_resnet_50_norm"
+dataset_folder = "imagenet_1000x34" # change here
+collection_name = "imagenet_resnet_50_norm"
 num_nlist = 750  # change here  4xsqrt(n) in each segment
 CREATE_INDEX = False # change here
 

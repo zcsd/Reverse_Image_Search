@@ -25,7 +25,7 @@ from configparser import ConfigParser
 from utils.minio_bucket import Bucket
 from minio.error import S3Error
 
-dataset_folder = "image_test" # change here
+dataset_folder = "imagenet_1000x34" # change here
 TO_MINIO = False # change here
 TO_HDF5 = False  # change here
 

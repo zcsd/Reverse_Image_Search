@@ -15,7 +15,7 @@ from configparser import ConfigParser
 
 from pymilvus import connections, Collection, utility
 
-collection_name = "image_resnet_50_norm" # change here
+collection_name = "imagenet_resnet_50_norm" # change here
 num_nlist = 750  # change here  4xsqrt(n) in each segment
 
 def create_index(collection):
