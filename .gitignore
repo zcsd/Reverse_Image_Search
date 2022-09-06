@@ -13,5 +13,7 @@ val/
 *.h5
 *.tar
 *.7z
+.towhee
+.cache
 
 test.py
