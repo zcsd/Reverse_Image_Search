@@ -14,6 +14,7 @@
 #    python image_search/app.py
 # =============================================================================
 
+import sys
 from datetime import datetime
 from configparser import ConfigParser
 
@@ -88,7 +89,14 @@ if __name__ == '__main__':
     cfg = ConfigParser()
     cfg.read('image_search/conf/config.ini')
 
-    image_searcher = Searcher(cfg.get('vector_server', 'host'), 
+    if (len(sys.argv) > 2 and sys.argv[1] == "--vectorhost"):
+        vector_server_host = sys.argv[2]
+    else:
+        vector_server_host = cfg.get('vector_server', 'host')
+    
+    print(vector_server_host, "will be used as vector server host.")
+
+    image_searcher = Searcher(vector_server_host, 
                           cfg.get('vector_server', 'port'),
                           collection_name)
 

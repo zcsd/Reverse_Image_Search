@@ -9,7 +9,7 @@ setup(
     packages=find_packages(include=['image_search']),
     install_requires=[
         'numpy==1.23.2',
-        'opencv-python==4.6.0.66',
+        'opencv-python-headless==4.6.0.66',
         'pillow==9.2.0',
         'flask==2.2.2',
         'flask-cors==3.0.10',
