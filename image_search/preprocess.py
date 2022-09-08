@@ -25,9 +25,9 @@ from configparser import ConfigParser
 from utils.minio_bucket import Bucket
 from minio.error import S3Error
 
-dataset_folder = "imagenet_1000x34" # change here
+dataset_folder = "imagenet" # change here
 TO_MINIO = False # change here
-TO_HDF5 = False  # change here
+TO_HDF5 = True  # change here
 
 def upload_to_minio(bucket, file_path_on_minio, file_path_on_disk):
     try:
