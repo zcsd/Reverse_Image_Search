@@ -1,5 +1,5 @@
 FROM python:3.9-slim-bullseye
-MAINTAINER Zichun
+LABEL maintainer="Zichun"
 COPY image_search/ /project/image_search/
 COPY requirements.txt /project/
 COPY .towhee/ /root/.towhee/

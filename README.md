@@ -22,7 +22,7 @@ $ docker build --no-cache -t image_search:v1.0 .
 # 3. Run with Docker
 # If vector database sever is installed on the same machine,
 # you can run with the following command.
-$ docker run -p 5000:5000 --add-host=host.docker.internal:host-gateway -it imsearch:v1.0
+$ docker run -p 5000:5000 --add-host=host.docker.internal:host-gateway -it image_search:v1.0
 # If vector server is installed on the other machines.
 $ docker run -p 5000:5000 -it image_search:v1.0 python3 image_search/app.py --vectorhost replace.host.ip.here
 
