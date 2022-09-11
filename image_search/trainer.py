@@ -95,13 +95,13 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    hf = h5py.File(os.path.join(data_folder, dataset_folder, 'train8.h5'), 'r')
+    hf = h5py.File(os.path.join(data_folder, dataset_folder, 'train.h5'), 'r')
     length = len(hf.items())
     print("Total number of images in HDF5 file: {}".format(length))
     print("Start to embedding and insert vector data...")
 
     if INSERT_VECTOR_TO_HDF5:
-        hf_vector = h5py.File(os.path.join(data_folder, dataset_folder, 'vector8.h5'), 'a')
+        hf_vector = h5py.File(os.path.join(data_folder, dataset_folder, 'vector.h5'), 'a')
         print("Start to save embedding vector to HDF5 file...")
 
     for i, (key, value) in enumerate(hf.items()):
