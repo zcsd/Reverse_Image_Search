@@ -16,7 +16,7 @@ from towhee.functional.entity import Entity
 
 class Searcher:
     def __init__(self, host, port, collection_name):
-        connections.connect(host=host, port=port)
+        connections.connect('default', host=host, port=port)
 
         print("Connected to vector server {0}:{1} successfully.".format(host, port))
 
@@ -43,10 +43,10 @@ class Searcher:
         print('Image Searcher is ready to search.')
 
     def disconnect(self):
-        connections.disconnect("default")
+        connections.disconnect('default')
         print('Disconnected from vector server.')
 
-    def get_numer_of_entities(self):
+    def get_number_of_entities(self):
         return self.collection.num_entities
 
     def search(self, pil_img, nprobe=6):

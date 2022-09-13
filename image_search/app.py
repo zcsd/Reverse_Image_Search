@@ -30,10 +30,9 @@ SERVER = 2 # change here
 
 app = Flask(__name__)
 
-@app.route('/')
-def index():
-    # check AI server status
-    entities_num = image_searcher.get_numer_of_entities()
+@app.route('/status/', methods=['GET'])
+def status():
+    entities_num = image_searcher.get_number_of_entities()
 
     if (SERVER == 0):
         cpu = "Intel Xeon @ 2.80GHz, 8 cores"
@@ -53,41 +52,53 @@ def index():
     else:
         return jsonify({'ok': False})
 
-@app.route("/cbir/", methods=['GET', 'POST'])
-def cbir():
-    if request.method == 'POST':
-        data = request.json
-        if data["key"] == "demo1": # temporary using
-            print('Valid Key Provided.')
-            img = base64_to_pil(data["image"])
-            results = image_searcher.search(img, 6)
+@app.route('/insert/', methods=['POST'])
+def insert():
+    data = request.json
+    if data["key"] == admin_key:
+        pass  
 
-            now = datetime.now()
-            timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
-            img.save("image_search/data/upload/" + timestamp +".JPEG") 
-            print('An uploaded image saved.')
+@app.route('/indexing/', methods=['POST'])
+def indexing():
+    data = request.json
+    if data["key"] == admin_key:
+        pass   
 
-            image_base_url = cfg.get('url', 'image_base')
-            
-            resp = jsonify({'ok':True,
-                    'image1': image_base_url + results[0].label.replace("@", "/"),
-                    'image2': image_base_url + results[1].label.replace("@", "/"),
-                    'image3': image_base_url + results[2].label.replace("@", "/"),
-                    'image4': image_base_url + results[3].label.replace("@", "/"),
-                    'image5': image_base_url + results[4].label.replace("@", "/"),
-                    'embedding_time': results[5].embedding_time,
-                    'search_time': results[5].search_time,
-                    })
-        else:
-            print('Invalid Key.')
-            resp = jsonify({'ok':False, 'result':'Invalid Key.'})
-        return resp
+@app.route("/search/", methods=['POST'])
+def search():
+    data = request.json
+    if data["key"] == user_key:
+        print('Valid Key Provided.')
+        img = base64_to_pil(data["image"])
+        results = image_searcher.search(img, 10) # nprobe = 10
+
+        now = datetime.now()
+        timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
+        img.save("image_search/data/upload/" + timestamp +".JPEG") 
+        print('An uploaded image saved.')
+
+        image_base_url = cfg.get('url', 'image_base')
+        
+        resp = jsonify({'ok':True,
+                'image1': image_base_url + results[0].label.replace("@", "/"),
+                'image2': image_base_url + results[1].label.replace("@", "/"),
+                'image3': image_base_url + results[2].label.replace("@", "/"),
+                'image4': image_base_url + results[3].label.replace("@", "/"),
+                'image5': image_base_url + results[4].label.replace("@", "/"),
+                'embedding_time': results[5].embedding_time,
+                'search_time': results[5].search_time,
+                })
     else:
-        return 'Invalid Method.\n'
+        print('Invalid Key.')
+        resp = jsonify({'ok':False, 'result':'Invalid Key.'})
+    return resp
 
 if __name__ == '__main__':
     cfg = ConfigParser()
     cfg.read('image_search/conf/config.ini')
+
+    user_key = cfg.get('key_validation', 'user')
+    admin_key = cfg.get('key_validation', 'admin')
 
     if (len(sys.argv) > 2 and sys.argv[1] == "--vectorhost"):
         vector_server_host = sys.argv[2]

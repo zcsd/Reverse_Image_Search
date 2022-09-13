@@ -34,7 +34,7 @@ num_nlist = 2048  # change here  4xsqrt(n) in each segment
 INSERT_VECTOR_TO_COLLECTION = True # change here
 CREATE_NEW_COLLECTION = False # change here
 CREATE_INDEX = False # change here
-INSERT_VECTOR_TO_HDF5 = True # change here
+INSERT_VECTOR_TO_HDF5 = False # change here
 
 def create_collection(collection_name, dim, description):
     if utility.has_collection(collection_name):
@@ -127,7 +127,8 @@ if __name__ == '__main__':
             progress(int((i/length) * 100))
 
     hf.close()
-    hf_vector.close()
+    if INSERT_VECTOR_TO_HDF5:
+        hf_vector.close()
 
     if len(id_list) != 0:
         if INSERT_VECTOR_TO_COLLECTION:
