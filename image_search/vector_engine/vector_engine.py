@@ -4,7 +4,7 @@
 # Date created: 2022/08/12
 # Python Version: 3.10
 # Description:
-#    - Class Searcher
+#    - Class VectorEngine
 # =============================================================================
 
 import time
@@ -14,7 +14,7 @@ from towhee.types.image_utils import from_pil
 from towhee import ops
 from towhee.functional.entity import Entity
 
-class Searcher:
+class VectorEngine:
     def __init__(self, host, port, collection_name):
         connections.connect('default', host=host, port=port)
 
@@ -22,32 +22,36 @@ class Searcher:
 
         if utility.has_collection(collection_name):
             self.collection = Collection(collection_name)
-            print('Total number of entities in {} is {}.'.format(collection_name, self.collection.num_entities))
+            self.num_entities = self.collection.num_entities
+            print('Total number of entities in {} is {}.'.format(collection_name, self.num_entities))
             
             self.op = ops.image_embedding.timm(model_name='resnet50')
         else:
             print('Collection {} does not exist.'.format(collection_name))
             return
 
-        # another way to search vector
-        #with towhee.api() as api:
-        #    self.search = (
-        #        api.runas_op(func=lambda img: from_pil(img))
-        #        .image_embedding.timm(model_name='resnet50')
-        #        .tensor_normalize()
-        #        .milvus_search(collection=self.collection, limit=5, output_fields=['id', 'label'])
-        #        .runas_op(func=lambda res: [[x.id, x.score, x.label] for x in res])
-        #        .as_function()
-        #    )
-
-        print('Image Searcher is ready to search.')
-
-    def disconnect(self):
-        connections.disconnect('default')
-        print('Disconnected from vector server.')
+        print('Vector Engine is ready to search.')
 
     def get_number_of_entities(self):
-        return self.collection.num_entities
+        self.num_entities = self.collection.num_entities
+        return self.num_entities
+
+    def insert(self, pil_img, location):
+        vector = self.op(from_pil(pil_img))
+        norm_vector = vector / np.linalg.norm(vector)
+        self.collection.insert([[self.num_entities], [location],[norm_vector]])
+        print("Inserted entity {0} into collection {1} successfully.""".format(self.num_entities, self.collection.name))
+        self.num_entities += 1
+
+    def create_index(self, num_nlist=2048):
+        index_params = {
+            'metric_type': 'L2',
+            'index_type': "IVF_FLAT",
+            'params':{"nlist": num_nlist}
+        }
+        print("Creating index...")
+        self.collection.create_index(field_name="embedding", index_params=index_params)
+        print("Created index successfully.")
 
     def search(self, pil_img, nprobe=6):
         start_time = time.time() 
@@ -79,4 +83,6 @@ class Searcher:
 
         return results
 
-
+    def disconnect(self):
+        connections.disconnect('default')
+        print('Disconnected from vector server.')

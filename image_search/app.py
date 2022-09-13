@@ -9,7 +9,10 @@
 #    The main loop is responsible for the following:
 #       - Initializing the application.
 #       - Loading the image search engine.
-#       - Handle real-time image search request.
+#       - Handle vector server status request.
+#       - Handle image search request.
+#       - Handle insert new image request.
+#       - Handle create new index request.
 # How to run:
 #    python image_search/app.py
 # =============================================================================
@@ -22,7 +25,7 @@ from gevent.pywsgi import WSGIServer
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-from searcher.searcher import Searcher
+from vector_engine.vector_engine import VectorEngine
 from utils.image_util import base64_to_pil
 
 collection_name = "imagenet_resnet_50_norm" # change here
@@ -32,7 +35,7 @@ app = Flask(__name__)
 
 @app.route('/status/', methods=['GET'])
 def status():
-    entities_num = image_searcher.get_number_of_entities()
+    entities_num = vector_engine.get_number_of_entities()
 
     if (SERVER == 0):
         cpu = "Intel Xeon @ 2.80GHz, 8 cores"
@@ -56,21 +59,31 @@ def status():
 def insert():
     data = request.json
     if data["key"] == admin_key:
-        pass  
+        print('Valid Admin Key Provided.')
+        img = base64_to_pil(data["image"])
+        vector_engine.insert(img, data["location"])
+        return jsonify({'ok': True})
+    else:
+        print('Invalid Admin Key Provided.')
+        return jsonify({'ok':False, 'result':'Invalid Key.'})
 
 @app.route('/indexing/', methods=['POST'])
 def indexing():
     data = request.json
     if data["key"] == admin_key:
-        pass   
+        vector_engine.create_index()
+        return jsonify({'ok': True})
+    else:
+        print('Invalid Admin Key Provided.')
+        return jsonify({'ok':False, 'result':'Invalid Key.'}) 
 
 @app.route("/search/", methods=['POST'])
 def search():
     data = request.json
     if data["key"] == user_key:
-        print('Valid Key Provided.')
+        print('Valid User Key Provided.')
         img = base64_to_pil(data["image"])
-        results = image_searcher.search(img, 10) # nprobe = 10
+        results = vector_engine.search(img, 10) # nprobe = 10
 
         now = datetime.now()
         timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
@@ -107,7 +120,7 @@ if __name__ == '__main__':
     
     print(vector_server_host, "will be used as vector server host.")
 
-    image_searcher = Searcher(vector_server_host, 
+    vector_engine = VectorEngine(vector_server_host, 
                           cfg.get('vector_server', 'port'),
                           collection_name)
 

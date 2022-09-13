@@ -2,8 +2,8 @@ FROM python:3.9-slim-bullseye
 LABEL maintainer="Zichun"
 COPY image_search/ /project/image_search/
 COPY requirements.txt /project/
-COPY .towhee/ /root/.towhee/
-COPY .cache/ /root/.cache/
+#COPY .towhee/ /root/.towhee/
+#COPY .cache/ /root/.cache/
 RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && echo 'Asia/Shanghai' >/etc/timezone
 ENV LANG C.UTF-8
 ENV VECTORHOST host.docker.internal
