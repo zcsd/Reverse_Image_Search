@@ -5,7 +5,7 @@
 
 This is an out-of-the-box backend server for Reverse Image Search (Content-based Image Retrieval). You can quicky depoly entire application by using Docker.
 
-![](https://github.com/zcsd/Reverse_Image_Search/tree/master/doc/demo.gif)
+![](https://github.com/zcsd/Reverse_Image_Search/blob/master/doc/demo.gif)
 
 ## Quick Start
 
