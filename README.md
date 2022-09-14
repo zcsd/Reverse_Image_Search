@@ -5,6 +5,8 @@
 
 This is an out-of-the-box backend server for Reverse Image Search (Content-based Image Retrieval). You can quicky depoly entire application by using Docker.
 
+![](https://github.com/zcsd/Reverse_Image_Search/tree/master/doc/demo.gif)
+
 ## Quick Start
 
 ### 1. Install Vector Database
@@ -66,7 +68,7 @@ Now you can access MinIO control panel from *http://127.0.0.1:8001* (default use
 
 Login to the MinIO control panel website, create a new Bucket with name "images". After creating the new Bucket, change the Access Policy of the Bucket to "public", so that we can access any file or image in this bucket from *http://127.0.0.1:8000/images/XXXXXX*.
 
-Now we can upload images to MinIO, there are two ways: Manaully upload images from MinIO control panel (http://127.0.0.1:8001), we can select whole dataset folder to upload; Or you can use */Reverse_Image_Search/image_search/preprocess.py* to upload images using MinIO API.
+Now we can upload images to MinIO, there are two ways: Manaully upload images from MinIO control panel (*http://127.0.0.1:8001*), we can select whole dataset folder to upload; Or you can use */Reverse_Image_Search/image_search/preprocess.py* to upload images using MinIO API.
 
 After uploading, you can view the image by accessing the URL: *http://127.0.0.1:8000/images/n01440764/n01440764_18.JPEG* (example only).
 
@@ -145,9 +147,9 @@ http://127.0.0.1:5000/indexing/
 
 You can run a demo webpage to test the image search. [Click here](https://github.com/zcsd/reverse_image_search_web) to check the code for [frontend demo webpage](https://demo.best360.tech/). 
 
-Download the [Reverse_Image_Search_Web code](https://github.com/zcsd/Reverse_Image_Search_Web), [dist folder](https://github.com/zcsd/Reverse_Image_Search_Web/tree/master/dist) will work as your webpage source folder, you can ignore functions/api and package.json.
+Download the [Reverse_Image_Search_Web code](https://github.com/zcsd/Reverse_Image_Search_Web), [dist folder](https://github.com/zcsd/Reverse_Image_Search_Web/tree/master/dist) will work as your webpage source folder, you can ignore functions/api and package.json in the main directory.
 
-Change the baseURL to http://127.0.0.1:5000/ in /dist/assets/js/helper.js [line 223](https://github.com/zcsd/Reverse_Image_Search_Web/blob/master/dist/assets/js/helper.js#L223).
+Change the baseURL to *http://127.0.0.1:5000/* in /dist/assets/js/helper.js [line 223](https://github.com/zcsd/Reverse_Image_Search_Web/blob/master/dist/assets/js/helper.js#L223).
 
 Now you can open the frontend webpage to try the image search!
 
