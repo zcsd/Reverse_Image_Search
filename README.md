@@ -4,9 +4,9 @@
 [![](https://img.shields.io/badge/python-3.9%2B-green.svg)]()
 
 This is an out-of-the-box backend server for Reverse Image Search (Content-based Image Retrieval). You can quicky depoly entire application by using Docker.
-
+<p align="center">
 ![](https://github.com/zcsd/Reverse_Image_Search/blob/master/doc/demo.gif)
-
+</p>
 ## Quick Start
 
 ### 1. Install Vector Database
