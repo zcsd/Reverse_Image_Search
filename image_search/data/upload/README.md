@@ -1,1 +1,1 @@
-Save uploaded images in this folder
+Save uploaded query images in this folder
