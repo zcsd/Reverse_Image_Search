@@ -1,7 +1,7 @@
 # =============================================================================
 # File name: create_index.py
 # Author: Zichun
-# Date created: 2022/08/25
+# Date created: 2022/08/20
 # Python Version: 3.10
 # Description:
 #    - Create index for collection

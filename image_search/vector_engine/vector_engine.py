@@ -1,5 +1,5 @@
 # =============================================================================
-# File name: searcher.py
+# File name: vector_engine.py
 # Author: Zichun
 # Date created: 2022/08/12
 # Python Version: 3.10
@@ -25,6 +25,7 @@ class VectorEngine:
             self.num_entities = self.collection.num_entities
             print('Total number of entities in {} is {}.'.format(collection_name, self.num_entities))
             
+            # preload the model
             self.op = ops.image_embedding.timm(model_name='resnet50')
         else:
             print('Collection {} does not exist.'.format(collection_name))
@@ -36,9 +37,10 @@ class VectorEngine:
         self.num_entities = self.collection.num_entities
         return self.num_entities
 
+    # insert single image into collection
     def insert(self, pil_img, location):
         vector = self.op(from_pil(pil_img))
-        norm_vector = vector / np.linalg.norm(vector)
+        norm_vector = vector / np.linalg.norm(vector) # normalize the vector
         self.collection.insert([[self.num_entities], [location],[norm_vector]])
         print("Inserted entity {0} into collection {1} successfully.""".format(self.num_entities, self.collection.name))
         self.num_entities += 1
@@ -64,7 +66,7 @@ class VectorEngine:
         print("Total time spent on embedding: {} ms".format(embedding_time)) 
 
         start_time = time.time() 
-
+        # retrieve top 5 results, change limit to change the number of results
         raw_results = self.collection.search([norm_vector], anns_field="embedding", param = {"metric_type": "L2", "params": {"nprobe": nprobe}}, limit=5, output_fields=['id', 'label'])
         
         end_time = time.time() 
@@ -73,12 +75,13 @@ class VectorEngine:
         
         results = []
 
+        # convert raw results to Entity
         for re in raw_results:
             for hit in re:
                 dicts = dict(id=hit.id, distance=hit.distance)
                 dicts.update(hit.entity._row_data)
                 results.append(Entity(**dicts))
-        # add time spent to the results       
+        # add time spent to the results entity     
         results.append(Entity(search_time=search_time, embedding_time=embedding_time))
 
         return results

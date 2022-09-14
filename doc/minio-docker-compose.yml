@@ -1,0 +1,18 @@
+version: '1.0'
+services:
+  minio-files:
+    container_name: minio-files
+    image: minio/minio
+    hostname: "minio-files"
+    ports:
+      - 8000:9000 # api port 8000
+      - 8001:9001 # control panel port 8001
+    environment:
+      MINIO_ACCESS_KEY: user1 
+      MINIO_SECRET_KEY: user1password
+    volumes:
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/minio/data:/data              
+      - ${DOCKER_VOLUME_DIRECTORY:-.}/volumes/minio/config:/root/.minio/   
+    command: server --console-address ':9001' /data 
+    privileged: true
+    restart: always

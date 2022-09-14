@@ -4,12 +4,12 @@
 # Date created: 2022/08/10
 # Python Version: 3.10
 # Description:
-#    This is the main file for the image search application.
+#    This is the main file for the reverse image search application.
 #    It contains the main function and the main loop.
 #    The main loop is responsible for the following:
 #       - Initializing the application.
 #       - Loading the image search engine.
-#       - Handle vector server status request.
+#       - Handle vector server status query request.
 #       - Handle image search request.
 #       - Handle insert new image request.
 #       - Handle create new index request.
@@ -33,6 +33,10 @@ SERVER = 2 # change here
 
 app = Flask(__name__)
 
+# /status endpoint
+# Query the status of vector server
+# HTTP GET request
+# Return: JSON object
 @app.route('/status/', methods=['GET'])
 def status():
     entities_num = vector_engine.get_number_of_entities()
@@ -55,6 +59,10 @@ def status():
     else:
         return jsonify({'ok': False})
 
+# /insert endpoint
+# insert new image into collection
+# HTTP POST request
+# Return: JSON object
 @app.route('/insert/', methods=['POST'])
 def insert():
     data = request.json
@@ -67,16 +75,24 @@ def insert():
         print('Invalid Admin Key Provided.')
         return jsonify({'ok':False, 'result':'Invalid Key.'})
 
+# /create_index endpoint
+# create index for collection
+# HTTP POST request
+# Return: JSON object
 @app.route('/indexing/', methods=['POST'])
 def indexing():
     data = request.json
     if data["key"] == admin_key:
-        vector_engine.create_index()
+        vector_engine.create_index() # TODO: async
         return jsonify({'ok': True})
     else:
         print('Invalid Admin Key Provided.')
         return jsonify({'ok':False, 'result':'Invalid Key.'}) 
 
+# /search endpoint
+# search for similar images
+# HTTP POST request
+# Return: JSON object
 @app.route("/search/", methods=['POST'])
 def search():
     data = request.json
@@ -88,8 +104,9 @@ def search():
         now = datetime.now()
         timestamp = now.strftime("%Y-%m-%d_%H-%M-%S_%f")
         img.save("image_search/data/upload/" + timestamp +".JPEG") 
-        print('An uploaded image saved.')
+        print('A query image saved.')
 
+        # image_base_url is the base url for the bucket in the MinIO server (where to store the image library)
         image_base_url = cfg.get('url', 'image_base')
         
         resp = jsonify({'ok':True,
@@ -112,13 +129,13 @@ if __name__ == '__main__':
 
     user_key = cfg.get('key_validation', 'user')
     admin_key = cfg.get('key_validation', 'admin')
-
+    # read the arguments
     if (len(sys.argv) > 2 and sys.argv[1] == "--vectorhost"):
         vector_server_host = sys.argv[2]
     else:
         vector_server_host = cfg.get('vector_server', 'host')
     
-    print(vector_server_host, "will be used as vector server host.")
+    print(vector_server_host, "will be served as vector host.")
 
     vector_engine = VectorEngine(vector_server_host, 
                           cfg.get('vector_server', 'port'),

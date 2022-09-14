@@ -1,7 +1,7 @@
 # =============================================================================
-# File name: images_preprocess.py
+# File name: preprocess.py
 # Author: Zichun
-# Date created: 2022/08/25
+# Date created: 2022/08/20
 # Python Version: 3.10
 # Description:
 #    - image resize or other processes
@@ -14,19 +14,18 @@
 import os
 import io
 import time
+from configparser import ConfigParser
 
 import h5py
 import numpy as np
 from PIL import Image
 
 from utils.progress_helper import progress
-from configparser import ConfigParser
-
 from utils.minio_bucket import Bucket
 from minio.error import S3Error
 
 dataset_folder = "imagenet" # change here
-TO_MINIO = False # change here
+TO_MINIO = True # change here
 TO_HDF5 = True  # change here
 
 def upload_to_minio(bucket, file_path_on_minio, file_path_on_disk):
@@ -40,7 +39,7 @@ def upload_to_minio(bucket, file_path_on_minio, file_path_on_disk):
 if __name__ == '__main__':
     cfg = ConfigParser()
     cfg.read('image_search/conf/config.ini')
-
+    # loacte the train image folder
     data_folder = os.path.join(os.getcwd(), 'image_search', 'data')
     train_img_folder = os.path.join(data_folder, dataset_folder, 'train') 
     img_group_folders =  os.listdir(train_img_folder)
@@ -58,7 +57,7 @@ if __name__ == '__main__':
 
     if os.name == 'nt': # windows
         separator = '\\'
-    else:
+    else:               # linux or mac
         separator = '/'
 
     if TO_MINIO:
@@ -87,11 +86,13 @@ if __name__ == '__main__':
                 counter_fail_to_upload += 1
         
         if TO_HDF5:
-            #image = image.resize((224, 224))
-            image_buf = io.BytesIO()
+            #image = image.resize((224, 224)) # resize or not?
+            # save space by saving binary data
+            image_buf = io.BytesIO() 
             image.save(image_buf, format='JPEG')
             image_byte = image_buf.getvalue()
 
+            # another way to save binary data
             # using opencv to convert data, to save space in hdf5 file
             #image = cv2.imread(img_path)
             #image = cv2.resize(image, (224,224), interpolation=cv2.INTER_CUBIC)
@@ -101,10 +102,11 @@ if __name__ == '__main__':
             image_np = np.asarray(image_byte)
             
             # '\' can not be used in hdf5, so we use '@' instead
+            # label here is actually the folder name
             label = '@' + img_path.split(separator)[-2] + '@' + img_path.split(separator)[-1]
 
             # no need to compress, because binary data is used
-            hf.create_dataset(label, data=image_np,)
+            hf.create_dataset(label, data=image_np)
 
         if i % 5 == 0:
             progress(int((i/length_images) * 100))

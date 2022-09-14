@@ -29,11 +29,11 @@ from towhee.types.image_utils import from_pil
 from pymilvus import connections, FieldSchema, CollectionSchema, DataType, Collection, utility
 
 dataset_folder = "imagenet" # change here
-collection_name = "imagenet_resnet_50_norm"
+collection_name = "imagenet_resnet_50_norm" # change here
 num_nlist = 2048  # change here  4xsqrt(n) in each segment
 INSERT_VECTOR_TO_COLLECTION = True # change here
-CREATE_NEW_COLLECTION = False # change here
-CREATE_INDEX = False # change here
+CREATE_NEW_COLLECTION = True # change here
+CREATE_INDEX = True # change here
 INSERT_VECTOR_TO_HDF5 = False # change here
 
 def create_collection(collection_name, dim, description):
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
         if CREATE_NEW_COLLECTION:
             print("Creating collection...")
-            collection = create_collection(collection_name, 2048, "test description") # 2048 is dim
+            collection = create_collection(collection_name, 2048, "test description") # 2048 is feature dimension
             print("Collection {} created successfully.".format(collection_name))
         else:
             if utility.has_collection(collection_name):
@@ -105,8 +105,10 @@ if __name__ == '__main__':
         print("Start to save embedding vector to HDF5 file...")
 
     for i, (key, value) in enumerate(hf.items()):
+        # convert binary data to pil image
         image_data = np.array(hf[key]) 
         image_pil = Image.open(io.BytesIO(image_data))
+
         embedding_vector = op(from_pil(image_pil))
         norm_embedding_vector = embedding_vector / np.linalg.norm(embedding_vector)
 
@@ -151,8 +153,8 @@ if __name__ == '__main__':
         print("Index created successfully.")
         print("Total time spent on creating index: {:0.1f} seconds".format(end - start))
     
-        #print("Loading collection into memory...")
-        #collection.load()
-        #print("Collection loaded successfully.")
+        print("Loading collection into memory...")
+        collection.load()
+        print("Collection loaded successfully.")
     
     connections.disconnect("default")
